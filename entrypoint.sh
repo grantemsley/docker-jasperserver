@@ -60,6 +60,16 @@ if [ -f "/.do_deploy_jasperserver" ]; then
     # Done deploying fresh container
 fi
 
+# Update SMTP configuration for scheduler
+sed -i -e "s|^report.scheduler.mail.sender.host.*$|report.scheduler.mail.sender.host=$SMTP_HOST|g" /usr/local/tomcat/webapps/ROOT/WEB-INF/js.quartz.properties
+sed -i -e "s|^report.scheduler.mail.sender.username.*$|report.scheduler.mail.sender.username=$SMTP_USERNAME|g" /usr/local/tomcat/webapps/ROOT/WEB-INF/js.quartz.properties
+sed -i -e "s|^report.scheduler.mail.sender.password.*$|report.scheduler.mail.sender.password=$SMTP_PASSWORD|g" /usr/local/tomcat/webapps/ROOT/WEB-INF/js.quartz.properties
+sed -i -e "s|^report.scheduler.mail.sender.from.*$|report.scheduler.mail.sender.from=$SMTP_EMAIL|g" /usr/local/tomcat/webapps/ROOT/WEB-INF/js.quartz.properties
+sed -i -e "s|^report.scheduler.mail.sender.port.*$|report.scheduler.mail.sender.port=$SMTP_PORT|g" /usr/local/tomcat/webapps/ROOT/WEB-INF/js.quartz.properties
+sed -i -e "s|^report.scheduler.web.deployment.uri.*$|report.scheduler.web.deployment.uri=$URL|g" /usr/local/tomcat/webapps/ROOT/WEB-INF/js.quartz.properties
+
+
+
 # Update configuation files from the /config volume - mapping them directly breaks buildomatic, so we just copy them every time after everything else is configured
 cp -rfv /config/WEB-INF/* /usr/local/tomcat/webapps/ROOT/WEB-INF/ || true
 
