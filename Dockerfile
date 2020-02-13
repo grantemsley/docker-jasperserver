@@ -23,6 +23,15 @@ RUN wget "https://sourceforge.net/projects/jasperserver/files/JasperServer/Jaspe
 # Used to wait for the database to start before connecting to it
 # This script is from https://github.com/vishnubob/wait-for-it
 # as recommended by https://docs.docker.com/compose/startup-order/
+
+# Add files for the WebServiceDataSource plugin
+RUN wget https://community.jaspersoft.com/sites/default/files/releases/jaspersoft_webserviceds_v1.5.zip -O /tmp/webserviceds.zip && \
+    unzip /tmp/webserviceds.zip -d /tmp && \
+    mkdir -p /usr/src/webservice/WEB-INF && \
+    cp -rfv /tmp/JRS/WEB-INF/* /usr/src/webservice/WEB-INF && \
+    sed -i 's/queryLanguagesPro/queryLanguagesCe/g' /usr/src/webservice/WEB-INF/applicationContext-WebServiceDataSource.xml && \
+    rm -rf /tmp/*
+
 ADD wait-for-it.sh /wait-for-it.sh
 
 # Used to bootstrap JasperServer the first time it runs and start Tomcat each
@@ -35,6 +44,7 @@ RUN chmod a+x /entrypoint.sh && \
 
 # This volume allows JasperServer export zip files to be automatically imported when bootstrapping
 VOLUME ["/jasperserver-import"]
+VOLUME ["/config"]
 
 # By default, JasperReports Server only comes with Postgres & MariaDB drivers
 # Copy over other JBDC drivers the deploy-jdbc-jar ant task will put it in right location
