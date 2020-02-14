@@ -90,7 +90,7 @@ shopt -s nullglob # handle case if no files found
 CERT_FILES=/config/certs/*.pem
 for f in $CERT_FILES; do
     echo "Importing certificate $f"
-    keytool -keystore /usr/local/openjdk-8/jre/lib/security/cacerts -storepass changeit -importcert -trustcacerts -noprompt -file $f -alias `basename $f .pem`
+    keytool -keystore /usr/local/openjdk-8/jre/lib/security/cacerts -storepass changeit -importcert -trustcacerts -noprompt -file $f -alias `basename $f .pem` || true
 done
 
 # run Tomcat to start JasperServer webapp
