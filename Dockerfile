@@ -1,7 +1,7 @@
 FROM tomcat:9.0-jre8
 MAINTAINER Nic Grange nicolas.grange@retrievercommunications.com 
 
-ENV JASPERSERVER_VERSION 7.2.0
+ENV JASPERSERVER_VERSION 7.5.0
 
 # Set defaults for SMTP service - using the same ones in jasperserver
 ENV SMTP_HOST mail.example.com
@@ -12,7 +12,7 @@ ENV SMTP_PORT 25
 ENV URL http://localhost:8080
 
 # Execute all in one layer so that it keeps the image as small as possible
-RUN wget "https://sourceforge.net/projects/jasperserver/files/JasperServer/JasperReports%20Server%20Community%20Edition%20${JASPERSERVER_VERSION}/TIB_js-jrs-cp_${JASPERSERVER_VERSION}_bin.zip/download" \
+RUN wget "https://sourceforge.net/projects/jasperserver/files/JasperServer/JasperReports%20Server%20Community%20edition%20${JASPERSERVER_VERSION}/TIB_js-jrs-cp_${JASPERSERVER_VERSION}_bin.zip/download" \
          -O /tmp/jasperserver.zip  && \
     unzip /tmp/jasperserver.zip -d /usr/src/ && \
     rm /tmp/jasperserver.zip && \
@@ -53,6 +53,10 @@ RUN chmod a+x /entrypoint.sh && \
 # This volume allows JasperServer export zip files to be automatically imported when bootstrapping
 VOLUME ["/jasperserver-import"]
 VOLUME ["/config"]
+
+# Make keystore files be stored in config
+ENV ks /config/keystore
+ENV ksp /config/keystore
 
 # By default, JasperReports Server only comes with Postgres & MariaDB drivers
 # Copy over other JBDC drivers the deploy-jdbc-jar ant task will put it in right location

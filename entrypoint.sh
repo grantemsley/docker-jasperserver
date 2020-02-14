@@ -8,6 +8,9 @@ mkdir -p /config/WEB-INF
 # wait upto 30 seconds for the database to start before connecting
 /wait-for-it.sh $DB_HOST:$DB_PORT -t 30
 
+# Make sure buildomatic doesn't run in interactive mode - otherwise it may wait for a user to press Y to generate a new keystore
+export BUILDOMATIC_MODE=noninteractive
+
 # If this is a fresh container, deploy jasperserver
 # If /config/db_is_configured exists, skip the steps for adding things to the database
 if [ -f "/.do_deploy_jasperserver" ]; then
@@ -42,6 +45,15 @@ if [ -f "/.do_deploy_jasperserver" ]; then
     
     # Add WebServiceDataSource plugin
     cp -rfv /usr/src/webservice/WEB-INF/* /usr/local/tomcat/webapps/ROOT/WEB-INF/
+
+    # Disable the prompt about opt in for heartbeat, if the environment variable was set
+    if [ "$DISABLE_HEARTBEAT" = true ]; then
+        sed -i -e "s|^heartbeat.enabled.*$|heartbeat.enabled=false|g" /usr/local/tomcat/webapps/ROOT/WEB-INF/js.config.properties
+        sed -i -e "s|^heartbeat.askForPermission.enabled.*$|heartbeat.askForPermission.enabled=false|g" /usr/local/tomcat/webapps/ROOT/WEB-INF/js.config.properties
+        sed -i -e "s|^heartbeat.permissionGranted.enabled.*$|heartbeat.permissionGranted.enabled=false|g" /usr/local/tomcat/webapps/ROOT/WEB-INF/js.config.properties
+    fi
+    
+
 
     # Only import the files if the database hasn't previously been configured
     if [ ! -f "/config/db_is_configured" ]; then
