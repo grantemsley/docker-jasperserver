@@ -1,5 +1,5 @@
 FROM tomcat:9-jdk8
-MAINTAINER Nic Grange nicolas.grange@retrievercommunications.com 
+MAINTAINER Grant Emsley <grant@emsley.ca> 
 
 ENV JASPERSERVER_VERSION 7.5.0
 
@@ -40,6 +40,12 @@ RUN wget https://community.jaspersoft.com/sites/default/files/releases/jaspersof
     sed -i 's/queryLanguagesPro/queryLanguagesCe/g' /usr/src/webservice/WEB-INF/applicationContext-WebServiceDataSource.xml && \
     rm -rf /tmp/*
 
+# Add MS SQL JDBC driver
+RUN wget https://download.microsoft.com/download/4/0/8/40815588-bef6-4715-bde9-baace8726c2a/sqljdbc_8.2.0.0_enu.tar.gz -O /tmp/mssql.tgz && \
+    tar zxvf /tmp/mssql.tgz -C /tmp && \
+    cp /tmp/sqljdbc_8.2/enu/mssql-jdbc-8.2.0.jre8.jar /usr/src/jasperreports-server/buildomatic/conf_source/db/app-srv-jdbc-drivers/mssql-jdbc-8.2.0.jre8.jar && \
+    rm -rf /tmp/*
+
 ADD wait-for-it.sh /wait-for-it.sh
 
 # Used to bootstrap JasperServer the first time it runs and start Tomcat each
@@ -61,7 +67,7 @@ ENV ksp /config/keystore
 # By default, JasperReports Server only comes with Postgres & MariaDB drivers
 # Copy over other JBDC drivers the deploy-jdbc-jar ant task will put it in right location
 ADD drivers/db2jcc4-no-pdq-in-manifest.jar /usr/src/jasperreports-server/buildomatic/conf_source/db/app-srv-jdbc-drivers/db2jcc4.jar
-ADD drivers/mysql-connector-java-5.1.44-bin.jar /usr/src/jasperreports-server/buildomatic/conf_source/db/app-srv-jdbc-drivers/mysql-connector-java-5.1.44-bin.jar
+ADD drivers/mysql-connector-java-8.0.19.jar /usr/src/jasperreports-server/buildomatic/conf_source/db/app-srv-jdbc-drivers/mysql-connector-java-8.0.19.jar
 
 # Copy web.xml with cross-domain enable
 ADD web.xml /usr/local/tomcat/conf/
