@@ -1,4 +1,4 @@
-FROM tomcat:9.0-jre8
+FROM tomcat:9-jdk8
 MAINTAINER Nic Grange nicolas.grange@retrievercommunications.com 
 
 ENV JASPERSERVER_VERSION 7.5.0

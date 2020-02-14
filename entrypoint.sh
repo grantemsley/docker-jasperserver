@@ -4,6 +4,8 @@ set -e
 
 # Make sure config directories exist
 mkdir -p /config/WEB-INF
+mkdir -p /config/certs
+mkdir -p /config/keystore
 
 # wait upto 30 seconds for the database to start before connecting
 /wait-for-it.sh $DB_HOST:$DB_PORT -t 30
@@ -80,10 +82,16 @@ sed -i -e "s|^report.scheduler.mail.sender.from.*$|report.scheduler.mail.sender.
 sed -i -e "s|^report.scheduler.mail.sender.port.*$|report.scheduler.mail.sender.port=$SMTP_PORT|g" /usr/local/tomcat/webapps/ROOT/WEB-INF/js.quartz.properties
 sed -i -e "s|^report.scheduler.web.deployment.uri.*$|report.scheduler.web.deployment.uri=$URL|g" /usr/local/tomcat/webapps/ROOT/WEB-INF/js.quartz.properties
 
-
-
 # Update configuation files from the /config volume - mapping them directly breaks buildomatic, so we just copy them every time after everything else is configured
 cp -rfv /config/WEB-INF/* /usr/local/tomcat/webapps/ROOT/WEB-INF/ || true
+
+# Import any cacerts (use for LDAPS)
+shopt -s nullglob # handle case if no files found
+CERT_FILES=/config/certs/*.pem
+for f in $CERT_FILES; do
+    echo "Importing certificate $f"
+    keytool -keystore /usr/local/openjdk-8/jre/lib/security/cacerts -storepass changeit -importcert -trustcacerts -noprompt -file $f -alias `basename $f .pem`
+done
 
 # run Tomcat to start JasperServer webapp
 catalina.sh run
